@@ -17,7 +17,7 @@ catkin_make
 ```
 
 
-To run everything on the car
+# To run everything on the car
 ```
 roslaunch the_robotics_club mit-car.launch
 ```
