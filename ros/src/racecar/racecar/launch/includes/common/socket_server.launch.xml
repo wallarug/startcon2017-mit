@@ -1,0 +1,9 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="racecar_version" />
+
+  <rosparam file="$(arg joy_teleop_config)" command="load" />
+
+  <node pkg="racecar" type="CommServerRecv.py" name="CommServerR" />
+
+</launch>
