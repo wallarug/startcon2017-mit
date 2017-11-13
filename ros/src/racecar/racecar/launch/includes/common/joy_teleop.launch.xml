@@ -10,7 +10,7 @@
 
   <node pkg="racecar" type="joy_teleop.py" name="joy_teleop" />
 
-  <node pkg="racecar" type="comms_node.py" name="comms_node" />
+  <!-- node pkg="racecar" type="comms_node.py" name="comms_node" / -->
 
 
 </launch>
