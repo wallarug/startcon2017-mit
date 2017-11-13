@@ -35,3 +35,8 @@ looks like the Zed uses about 1850/7850MB just being in the desktop with a few t
 sudo ~/tegrastats
 ```
 
+
+# Nodes and topics
+![alt text](../images/vesc_nodes.png "vesc nodes")
+
+![alt text](../images/zed_topics.png "zed topics")
