@@ -3,11 +3,13 @@ if the computer doesn't have the following packages installed you can
 ```
 git clone https://github.com/ros-drivers/ackermann_msgs.git src/ackermann_msgs
 git clone https://github.com/wjwwood/serial.git src/serial
+git clone https://github.com/robopeak/rplidar_ros.git src/rplidar_ros
 ```
 or
 ```
 sudo apt-get install ros-kinetic-ackermann-msgs
 sudo apt-get install ros-kinetic-serial
+sudo apt-get install ros-kinetic-rplidar-ros    # need to install this for rplidar
 ```
 
 To build and set environment variables
