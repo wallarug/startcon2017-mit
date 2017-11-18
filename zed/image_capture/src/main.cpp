@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
 
     // Set configuration parameters
     InitParameters init_params;
-    //init_params.camera_resolution = RESOLUTION_VGA; // HD1080, HD720, VGA
-    init_params.camera_resolution = RESOLUTION_HD720; // HD1080, HD720, VGA
+    init_params.camera_resolution = RESOLUTION_VGA; // HD1080, HD720, VGA
+//    init_params.camera_resolution = RESOLUTION_HD720; // HD1080, HD720, VGA
 
     // Open the camera
     ERROR_CODE err = zed.open(init_params);
