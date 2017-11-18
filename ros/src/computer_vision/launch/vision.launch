@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="computer_vision" type="detector.py" name="lane_detector"/>
+    <node pkg="computer_vision" type="detector.py" name="lane_detector" />
+    <node pkg="computer_vision" type="controller.py" name="path_controller" />
 </launch>
