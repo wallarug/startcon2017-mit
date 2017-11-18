@@ -12,6 +12,11 @@ sudo apt-get install ros-kinetic-serial
 sudo apt-get install ros-kinetic-rplidar-ros    # need to install this for rplidar
 ```
 
+# install vision_opencv
+```
+sudo apt-get install ros-kinetic-vision-opencv
+```
+
 To build and set environment variables
 ```
 catkin_make
