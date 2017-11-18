@@ -24,10 +24,21 @@ catkin_make
 ```
 
 
-# To run everything on the car
+# To run the car
 ```
+# run car + camera
 roslaunch the_robotics_club mit-car.launch
+# run car + camera + lidar
+roslaunch the_robotics_club mit-car-lidar.launch
+# run car + camera + cv
+roslaunch the_robotics_club mit-car-vision.launch
 ```
+
+# Using the Computer Vision launcher
+The joystick is used as safety for now. 
+Top left trigger: as is previously, used for manual control.
+Top right trigger: activates driving based computer vision & PID
+
 
 # To observe the camera remotely with rqt_gui
 ```
