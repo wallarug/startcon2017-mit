@@ -4,3 +4,4 @@ devel
 src/ackermann_msgs
 src/serial
 src/rplidar_ros
+*.pyc

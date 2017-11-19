@@ -87,8 +87,6 @@ class Detector:
             pose = self.generate_pose(index/1000, point/1000, 0, 0, 0, 0, 0)  # ~ measuring a pixel per mm
             path.poses.append(pose)
             # just cutting this short to save on cpu time
-            if index > 5:
-                return
 
         self.path_pub.publish(path)
 

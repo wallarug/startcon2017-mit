@@ -46,7 +46,7 @@ class LaneDetector():
     def filter_lanes(self, image):
         #         x_grad_binary = self.abs_sobel_thresh(image, orient='x', thresh=(20, 60))
         #         y_grad_binary = self.abs_sobel_thresh(image, orient='y', thresh=(20, 60))
-        hsl_channel_binary = self.hsl_channel_threshold(image, l_thresh=(0., 40.))
+        hsl_channel_binary = self.hsl_channel_threshold(image, l_thresh=(210., 255.))
 
         combined = np.zeros_like(hsl_channel_binary)  # this makes it 1 channel
         #         combined[(hsl_channel_binary == 1) & (x_grad_binary == 1) & (y_grad_binary == 1)] = 1
