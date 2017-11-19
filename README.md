@@ -20,6 +20,14 @@ To be completed.
 * How to run tests
 * Deployment instructions
 
+#### Remote Editing of files on the PI or Jetson
+```
+sudo apt-get install sshfs
+sudo mkdir /mnt/jetson
+sudo sshfs -o allow_other,IdentityFile=~/.ssh/id_rsa nvidia@192.x.x.x:/ /mnt/jetson  #replace nvidia@ip with the correct one
+```
+
+
 ### Contribution guidelines ###
 
 To be completed.
