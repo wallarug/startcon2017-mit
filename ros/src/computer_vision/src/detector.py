@@ -65,8 +65,8 @@ class Detector:
 
     def debug_publish(self):
         if self.debug == True:
-            debug_image = self.detector.debug_lanes_as_image()
-            self.debug_lane_pub.publish(self.bridge.cv2_to_imgmsg(debug_image, "rgb8"))
+            # debug_image = self.detector.debug_lanes_as_image()
+            # self.debug_lane_pub.publish(self.bridge.cv2_to_imgmsg(debug_image, "rgb8"))
             # left_filtered, right_filtered = self.detector.debug_filtered()
             # self.debug_filtered_left_pub.publish(self.bridge.cv2_to_compressed_imgmsg(left_filtered, "mono8"))
             # self.debug_filtered_right_pub.publish(self.bridge.cv2_to_compressed_imgmsg(right_filtered, "mono8"))
@@ -76,6 +76,7 @@ class Detector:
             # left_clean, right_clean = self.detector.debug_clean()
             # self.debug_clean_left_pub.publish(s   elf.bridge.cv2_to_compressed_imgmsg(left_clean, "rgb8"))
             # self.debug_clean_right_pub.publish(self.bridge.cv2_to_compressed_imgmsg(right_clean, "rgb8"))
+            pass
 
     def generate_path(self):
         path = Path()

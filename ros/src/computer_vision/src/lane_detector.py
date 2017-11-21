@@ -4,14 +4,17 @@ from scipy.ndimage.measurements import label
 import cv2 as cv2
 import numpy as np
 import time
-import rospy
+
+"""Lane Detector
+Pass in [] into the constructor to receive a list of tuples for debugging purposes.
+"""
 
 class LaneDetector():
-    def __init__(self, debug=False):
+    def __init__(self, debugger=None):
         self.middle_of_car = (250 + 700) / 2
         self.modified_width = 872
         self.modified_height = 376
-        self.debug = debug
+        self.debugger = debugger
 
     def abs_sobel_thresh(self, hls, orient='x', sobel_kernel=3, thresh=(0, 255)):
 
@@ -51,26 +54,28 @@ class LaneDetector():
         combined = np.zeros_like(hsl_channel_binary)  # this makes it 1 channel
         #         combined[(hsl_channel_binary == 1) & (x_grad_binary == 1) & (y_grad_binary == 1)] = 1
         combined[(hsl_channel_binary == 1)] = 1
-
         return combined
+
+    def cut_image(self, image):
+        return image[250:, :] #cut the top 250px
 
     def warp_image(self, image, mode='normal', side="left"):
         #         image = np.copy(image)
         if side == "left":
-            warp_vertices_src = [(75, image.shape[0]), (225, 250), (336, 250), (336, image.shape[0])]
+            warp_vertices_src = [(75, image.shape[0]), (225, 0), (336, 0), (336, image.shape[0])]
             src = np.float32(warp_vertices_src)
             dst = np.float32([[275, image.shape[0]], [275, 0], [536, 0], [536, image.shape[0]]])
         else:
-            warp_vertices_src = [(597, image.shape[0]), (447, 250), (336, 250), (336, image.shape[0])]
+            warp_vertices_src = [(597, image.shape[0]), (447, 0), (336, 0), (336, image.shape[0])]
             src = np.float32(warp_vertices_src)
             dst = np.float32([[597, image.shape[0]], [597, 0], [336, 0], [336, image.shape[0]]])
 
         if mode == 'normal':
             M = cv2.getPerspectiveTransform(src, dst)
-            warped = cv2.warpPerspective(image, M, (872, 376), flags=cv2.INTER_LINEAR)
+            warped = cv2.warpPerspective(image, M, (872, image.shape[0]), flags=cv2.INTER_LINEAR)
         elif mode == 'inverse':
             M = cv2.getPerspectiveTransform(dst, src)
-            warped = cv2.warpPerspective(image, M, (672, 376), flags=cv2.INTER_LINEAR)
+            warped = cv2.warpPerspective(image, M, (672, image.shape[0]), flags=cv2.INTER_LINEAR)
         return warped
 
     def clean_image(self, image, side="left"):
@@ -103,10 +108,12 @@ class LaneDetector():
 
     def process_images(self, left, right):
         # start = time.time()
+        left_cut = self.cut_image(left)
+        right_cut = self.cut_image(right)
 
         # convert to HLS
-        left_image = cv2.cvtColor(left, cv2.COLOR_BGR2HLS).astype(np.float)
-        right_image = cv2.cvtColor(right, cv2.COLOR_BGR2HLS).astype(np.float)
+        left_image = cv2.cvtColor(left_cut, cv2.COLOR_BGR2HLS).astype(np.float)
+        right_image = cv2.cvtColor(right_cut, cv2.COLOR_BGR2HLS).astype(np.float)
 
         # rospy.logwarn("time for HLS: %s", rospy.get_time() - start)
         # start = time.time()
@@ -114,15 +121,11 @@ class LaneDetector():
         # filter out lanes and warp it
         left_filtered = self.filter_lanes(left_image)
         right_filtered = self.filter_lanes(right_image)
-
         # rospy.logwarn("time for filter: %s", rospy.get_time() - start)
         # start = time.time()
-        # self.debug_left_filtered = left_filtered  ######debug
-        # self.debug_left_warped = left_warped  ######debug
         left_warped = self.warp_image(left_filtered, side="left")
         right_warped = self.warp_image(right_filtered, side="right")
-        # self.debug_right_filtered = right_filtered  ######debug
-        # self.debug_right_warped = right_warped  ######debug
+        
         # rospy.logwarn("time for warp: %s", rospy.get_time() - start)
         # start = time.time()
 
@@ -133,8 +136,6 @@ class LaneDetector():
         # rospy.logwarn("time for cleaning: %s", rospy.get_time() - start)
         # start = time.time()
 
-        # self.debug_left_clean = left_clean  ######debug
-        # self.debug_right_clean = right_clean  ######debug
         left_clean = cv2.flip(left_clean, 0)
         right_clean = cv2.flip(right_clean, 0)
 
@@ -157,7 +158,6 @@ class LaneDetector():
         # start = time.time()
 
         # find centre line
-        print(image_height)
         if len(right_fitx) == 0:
             centre = left_fitx + self.middle_of_car / 2
         elif len(left_fitx) == 0:
@@ -182,10 +182,24 @@ class LaneDetector():
         # rospy.logwarn("time for lines 2: %s", rospy.get_time() - start)
         # start = time.time()
 
-        if self.debug == True:
-            image = np.zeros([self.modified_height, self.modified_width, 3], dtype=np.uint8)
+        if self.debugger is not None:
+            # record images throughout
+            self.debugger.append(("input", [left, right]))
+            self.debugger.append(("cut", [left_cut, right_cut]))
+            # warped_raw = self.warp_image(np.copy(left), side="left")
+            # warped_inverse_raw = self.warp_image(warped_raw, mode='inverse', side="left")
+            # self.debugger.append(("left_warp_raw", [warped_raw, warped_inverse_raw]))
+            # warped_raw = self.warp_image(np.copy(right), side="right")
+            # warped_inverse_raw = self.warp_image(warped_raw, mode='inverse', side="right")
+            # self.debugger.append(("right_warp_raw", [warped_raw, warped_inverse_raw]))
+
+            self.debugger.append(("filtered", [self.build_image_from_mask(left_filtered), self.build_image_from_mask(right_filtered)]))
+            self.debugger.append(("warped", [self.build_image_from_mask(left_warped), self.build_image_from_mask(right_warped)]))
+            self.debugger.append(("clean", [self.build_image_from_mask(cv2.flip(left_clean, 0)), self.build_image_from_mask(cv2.flip(right_clean, 0))]))
+
+            image = np.zeros([image_height, self.modified_width, 3], dtype=np.uint8)
             y_axis = y_axis[51:][::-1]
-            cv2.line(image, (self.middle_of_car, 0), (self.middle_of_car, self.modified_height), (255, 255, 255), 2)
+            cv2.line(image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (255, 255, 255), 2)
             if len(left_fitx) > 0:
                 points = np.vstack((left_fitx[51:], y_axis)).T.astype(np.int32)
                 cv2.polylines(image, [points], False, (255, 0, 0), 2)
@@ -195,7 +209,7 @@ class LaneDetector():
 
             points = np.vstack((centre[51:], y_axis)).T.astype(np.int32)
             cv2.polylines(image, [points], False, (0, 255, 0), 2)
-            self.debug_image = image
+            self.debugger.append(("lane-lines", [image]))
 
         # rospy.logwarn("time for the end: %s", rospy.get_time() - start)
 
@@ -205,26 +219,10 @@ class LaneDetector():
     def get_lanes(self):
         return self.left_y, self.right_y, self.x_axis
 
-    def debug_lanes_as_image(self):
-        return self.debug_image
-
-    def debug_filtered(self):
-        left = self.debug_left_filtered*255
-        right = self.debug_right_filtered * 255
-        return left.astype(np.uint8), right.astype(np.uint8)
-        # return cv2.merge((left, left, left)).astype(np.uint8), cv2.merge((right, right, right)).astype(np.uint8)
-
-    def debug_warped(self):
-        left = self.debug_left_warped * 255
-        right = self.debug_right_warped * 255
-        return left.astype(np.uint8), right.astype(np.uint8)
-        # return cv2.merge((left, left, left)).astype(np.uint8), cv2.merge((right, right, right)).astype(np.uint8)
-
-    def debug_clean(self):
-        left = self.debug_left_clean * 255
-        right = self.debug_right_clean * 255
-        return left.astype(np.uint8), right.astype(np.uint8)
-        # return cv2.merge((left, left, left)).astype(np.uint8), cv2.merge((right, right, right)).astype(np.uint8)
+    def build_image_from_mask(self, mask):
+        image = np.zeros([mask.shape[0], mask.shape[1], 3], dtype=np.uint8)
+        image[mask > 0] = 255
+        return image
 
 
 if __name__ == "__main__":
