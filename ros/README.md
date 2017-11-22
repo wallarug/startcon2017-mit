@@ -4,12 +4,14 @@ if the computer doesn't have the following packages installed you can
 git clone https://github.com/ros-drivers/ackermann_msgs.git src/ackermann_msgs
 git clone https://github.com/wjwwood/serial.git src/serial
 git clone https://github.com/robopeak/rplidar_ros.git src/rplidar_ros
+git clone https://github.com/tu-darmstadt-ros-pkg/hector_slam.git src/hector_slam
 ```
 or
 ```
 sudo apt-get install ros-kinetic-ackermann-msgs
 sudo apt-get install ros-kinetic-serial
 sudo apt-get install ros-kinetic-rplidar-ros    # need to install this for rplidar
+sudo apt-get install ros-kinetic-hector-slam    # SLAM packages
 ```
 
 # install vision_opencv
@@ -28,8 +30,12 @@ catkin_make
 ```
 # run car + camera
 roslaunch the_robotics_club mit-car.launch
-# run car + camera + lidar
+
+# run car + camera + lidar + hectorslam
 roslaunch the_robotics_club mit-car-lidar.launch
+# then on a remote ubuntu machine run
+roslaunch the_robotics_club mit-car-lidar-observer.launch
+
 # run car + camera + cv
 roslaunch the_robotics_club mit-car-vision.launch
 ```
