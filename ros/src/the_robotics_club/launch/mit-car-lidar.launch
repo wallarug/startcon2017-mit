@@ -2,4 +2,6 @@
 <launch>
     <include file="$(find the_robotics_club)/launch/mit-car.launch" />
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+    <include file="$(find the_robotics_club)/launch/mapping.launch" />
+
 </launch>
