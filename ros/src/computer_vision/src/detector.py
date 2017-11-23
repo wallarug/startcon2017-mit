@@ -56,7 +56,7 @@ class Detector:
     def generate_path(self, target_line):
         path = Path()
         path.header.frame_id = "/zed_initial_frame"
-        rospy.logwarn(target_line[0])
+        # rospy.logwarn(target_line[0])
         for index, point in enumerate(target_line):
             pose = self.generate_pose(index/1000, point/1000, 0, 0, 0, 0, 0)  # ~ measuring a pixel per mm
             path.poses.append(pose)
