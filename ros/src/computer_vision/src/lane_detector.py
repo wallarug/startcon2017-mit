@@ -62,9 +62,9 @@ class LaneDetector():
     def warp_image(self, image, mode='normal', side="left"):
         #         image = np.copy(image)
         if side == "left":
-            warp_vertices_src = [(75, image.shape[0]), (225, 0), (336, 0), (336, image.shape[0])]
+            warp_vertices_src = [(75, image.shape[0]), (300, 185), (385, 185), (597, image.shape[0])]  # both sides
             src = np.float32(warp_vertices_src)
-            dst = np.float32([[275, image.shape[0]], [275, 0], [536, 0], [536, image.shape[0]]])
+            dst = np.float32([[375, image.shape[0]], [375, 0], [697, 0], [697, image.shape[0]]])
         else:
             warp_vertices_src = [(597, image.shape[0]), (447, 0), (336, 0), (336, image.shape[0])]
             src = np.float32(warp_vertices_src)
@@ -72,19 +72,19 @@ class LaneDetector():
 
         if mode == 'normal':
             M = cv2.getPerspectiveTransform(src, dst)
-            warped = cv2.warpPerspective(image, M, (872, image.shape[0]), flags=cv2.INTER_LINEAR)
+            warped = cv2.warpPerspective(image, M, (1072, image.shape[0]), flags=cv2.INTER_LINEAR)
         elif mode == 'inverse':
             M = cv2.getPerspectiveTransform(dst, src)
             warped = cv2.warpPerspective(image, M, (672, image.shape[0]), flags=cv2.INTER_LINEAR)
         return warped
 
     def clean_image(self, image, side="left"):
-        if side == "left":
-            image[:, -300:] = 0
-            image[-50:, -372:] = 0
-        else:
-            image[:, 0:300] = 0
-            image[-50:, :450] = 0
+        # if side == "left":
+        #     image[:, -300:] = 0
+        #     image[-50:, -372:] = 0
+        # else:
+        #     image[:, 0:300] = 0
+        #     image[-50:, :450] = 0
         return image  # all the stuff below takes too long
         # labels = label(image)  # labels[0] = image with labels, labels[1] = count of labels
         # result = labels[0]
@@ -106,86 +106,67 @@ class LaneDetector():
         line_fitx = fit[0] * y_axis ** 2 + fit[1] * y_axis + fit[2]
         return line_fitx
 
-    def process_images(self, left, right):
+    def process_images(self, left):
         # start = time.time()
-        left_cut = self.cut_image(left)
-        right_cut = self.cut_image(right)
+        # left_cut = self.cut_image(left)
 
         # convert to HLS
-        left_image = cv2.cvtColor(left_cut, cv2.COLOR_BGR2HLS).astype(np.float)
-        right_image = cv2.cvtColor(right_cut, cv2.COLOR_BGR2HLS).astype(np.float)
-
-        # rospy.logwarn("time for HLS: %s", rospy.get_time() - start)
-        # start = time.time()
+        left_image = cv2.cvtColor(left, cv2.COLOR_BGR2HLS).astype(np.float)
 
         # filter out lanes and warp it
         left_filtered = self.filter_lanes(left_image)
-        right_filtered = self.filter_lanes(right_image)
-        # rospy.logwarn("time for filter: %s", rospy.get_time() - start)
-        # start = time.time()
-        left_warped = self.warp_image(left_filtered, side="left")
-        right_warped = self.warp_image(right_filtered, side="right")
-        
-        # rospy.logwarn("time for warp: %s", rospy.get_time() - start)
-        # start = time.time()
+
+        left_warped = self.warp_image(left_filtered)
+
+
 
         # clean and flip the image upside down to make the front of the car x = 0
-        left_clean = self.clean_image(left_warped, side="left")
-        right_clean = self.clean_image(right_warped, side="right")
-
-        # rospy.logwarn("time for cleaning: %s", rospy.get_time() - start)
-        # start = time.time()
+        # left_clean = self.clean_image(left_warped, side="left")
+        left_clean = left_warped
 
         left_clean = cv2.flip(left_clean, 0)
-        right_clean = cv2.flip(right_clean, 0)
 
-        # rospy.logwarn("time for flipping: %s", rospy.get_time() - start)
-        # start = time.time()
 
         # fit a line to the left and right
-        image_height = left_clean.shape[0]
-        y_axis = np.linspace(-50, image_height - 1, num=image_height + 50)
-        y, x = np.nonzero(left_clean)
-        left_fitx = []
-        if len(y) > 0:
-            left_fitx = self.get_line_fit(left_clean, y_axis)
-        y, x = np.nonzero(right_clean)
-        right_fitx = []
-        if len(y) > 0:
-            right_fitx = self.get_line_fit(right_clean, y_axis)
-
-        # rospy.logwarn("time for lines 1: %s", rospy.get_time() - start)
-        # start = time.time()
-
-        # find centre line
-        if len(right_fitx) == 0:
-            centre = left_fitx + self.middle_of_car / 2
-        elif len(left_fitx) == 0:
-            centre = right_fitx - self.middle_of_car / 2
-        elif len(left_fitx) > 0 and len(right_fitx) > 0:
-            centre = (left_fitx + right_fitx) / 2
-        else:
-            centre = np.full(len(y_axis), self.middle_of_car)
-
-        # translate this to have the front of the car to be the positive x-axis
-        self.x_axis = y_axis
-        if len(left_fitx) > 0:
-            self.left_y = (left_fitx - self.middle_of_car) * -1
-        else:
-            self.left_y = []
-        if len(right_fitx) > 0:
-            self.right_y = (right_fitx - self.middle_of_car) * -1
-        else:
-            self.right_y = []
-        self.centre = centre - self.middle_of_car
+        # image_height = left_clean.shape[0]
+        # y_axis = np.linspace(-50, image_height - 1, num=image_height + 50)
+        # y, x = np.nonzero(left_clean)
+        # left_fitx = []
+        # if len(y) > 0:
+        #     left_fitx = self.get_line_fit(left_clean, y_axis)
+        #
+        # # rospy.logwarn("time for lines 1: %s", rospy.get_time() - start)
+        # # start = time.time()
+        #
+        # # find centre line
+        # if len(right_fitx) == 0:
+        #     centre = left_fitx + self.middle_of_car / 2
+        # elif len(left_fitx) == 0:
+        #     centre = right_fitx - self.middle_of_car / 2
+        # elif len(left_fitx) > 0 and len(right_fitx) > 0:
+        #     centre = (left_fitx + right_fitx) / 2
+        # else:
+        #     centre = np.full(len(y_axis), self.middle_of_car)
+        #
+        # # translate this to have the front of the car to be the positive x-axis
+        # self.x_axis = y_axis
+        # if len(left_fitx) > 0:
+        #     self.left_y = (left_fitx - self.middle_of_car) * -1
+        # else:
+        #     self.left_y = []
+        # if len(right_fitx) > 0:
+        #     self.right_y = (right_fitx - self.middle_of_car) * -1
+        # else:
+        #     self.right_y = []
+        # self.centre = centre - self.middle_of_car
 
         # rospy.logwarn("time for lines 2: %s", rospy.get_time() - start)
         # start = time.time()
 
         if self.debugger is not None:
             # record images throughout
-            self.debugger.append(("input", [left, right]))
-            self.debugger.append(("cut", [left_cut, right_cut]))
+            self.debugger.append(("input", left))
+            # self.debugger.append(("cut", [left_cut, right_cut]))
             # warped_raw = self.warp_image(np.copy(left), side="left")
             # warped_inverse_raw = self.warp_image(warped_raw, mode='inverse', side="left")
             # self.debugger.append(("left_warp_raw", [warped_raw, warped_inverse_raw]))
@@ -193,23 +174,23 @@ class LaneDetector():
             # warped_inverse_raw = self.warp_image(warped_raw, mode='inverse', side="right")
             # self.debugger.append(("right_warp_raw", [warped_raw, warped_inverse_raw]))
 
-            self.debugger.append(("filtered", [self.build_image_from_mask(left_filtered), self.build_image_from_mask(right_filtered)]))
-            self.debugger.append(("warped", [self.build_image_from_mask(left_warped), self.build_image_from_mask(right_warped)]))
-            self.debugger.append(("clean", [self.build_image_from_mask(cv2.flip(left_clean, 0)), self.build_image_from_mask(cv2.flip(right_clean, 0))]))
+            self.debugger.append(("filtered", self.build_image_from_mask(left_filtered)))
+            self.debugger.append(("warped", self.build_image_from_mask(left_warped)))
+            self.debugger.append(("clean", self.build_image_from_mask(cv2.flip(left_clean, 0))))
 
-            image = np.zeros([image_height, self.modified_width, 3], dtype=np.uint8)
-            y_axis = y_axis[51:][::-1]
-            cv2.line(image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (255, 255, 255), 2)
-            if len(left_fitx) > 0:
-                points = np.vstack((left_fitx[51:], y_axis)).T.astype(np.int32)
-                cv2.polylines(image, [points], False, (255, 0, 0), 2)
-            if len(right_fitx) > 0:
-                points = np.vstack((right_fitx[51:], y_axis)).T.astype(np.int32)
-                cv2.polylines(image, [points], False, (0, 0, 255), 2)
+            # image = np.zeros([image_height, self.modified_width, 3], dtype=np.uint8)
+            # y_axis = y_axis[51:][::-1]
+            # cv2.line(image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (255, 255, 255), 2)
+            # if len(left_fitx) > 0:
+            #     points = np.vstack((left_fitx[51:], y_axis)).T.astype(np.int32)
+            #     cv2.polylines(image, [points], False, (255, 0, 0), 2)
+            # if len(right_fitx) > 0:
+            #     points = np.vstack((right_fitx[51:], y_axis)).T.astype(np.int32)
+            #     cv2.polylines(image, [points], False, (0, 0, 255), 2)
 
-            points = np.vstack((centre[51:], y_axis)).T.astype(np.int32)
-            cv2.polylines(image, [points], False, (0, 255, 0), 2)
-            self.debugger.append(("lane-lines", [image]))
+            # points = np.vstack((centre[51:], y_axis)).T.astype(np.int32)
+            # cv2.polylines(image, [points], False, (0, 255, 0), 2)
+            # self.debugger.append(("lane-lines", [image]))
 
         # rospy.logwarn("time for the end: %s", rospy.get_time() - start)
 
@@ -217,7 +198,8 @@ class LaneDetector():
         return self.centre, self.x_axis
 
     def get_lanes(self):
-        return self.left_y, self.right_y, self.x_axis
+        # return self.left_y, self.right_y, self.x_axis
+        pass
 
     def build_image_from_mask(self, mask):
         image = np.zeros([mask.shape[0], mask.shape[1], 3], dtype=np.uint8)
