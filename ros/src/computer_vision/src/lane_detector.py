@@ -33,7 +33,7 @@ class LaneDetector():
         return combined
 
     def filter_lanes(self, image):
-        hsl_channel_binary = self.hsl_channel_threshold(image, l_thresh=(0., 50.))
+        hsl_channel_binary = self.hsl_channel_threshold(image, l_thresh=(210., 255.))
 
         combined = np.zeros_like(hsl_channel_binary)  # this makes it 1 channel
         combined[(hsl_channel_binary == 1)] = 1
