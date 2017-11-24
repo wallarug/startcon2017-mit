@@ -40,7 +40,7 @@ class LaneDetector():
         return combined
 
     def cut_image(self, image):
-        return image[250:, :] #cut the top 250px
+        return image[185:, :] #cut the top
 
     def warp_image(self, image, mode='normal'):
         warp_vertices_src = [(75, image.shape[0]), (300, 185), (385, 185), (597, image.shape[0])]  # both sides
@@ -85,8 +85,8 @@ class LaneDetector():
                 line_fit = get_line_fit(feature_image, y_axis)
                 if line_fit is not None:
                     lines.append(line_fit)
-                    points = np.vstack((line_fit, y_axis)).T.astype(np.int32)
-                    cv2.polylines(debug_image, [points], False, (255, 0, 0), 3)
+                    points = np.vstack((line_fit, y_axis)).T.astype(np.int32)   ###Debug
+                    cv2.polylines(debug_image, [points], False, (255, 0, 0), 3)   ###Debug
             except:
                 print("Unexpected error:", sys.exc_info()[0])
 
@@ -116,9 +116,9 @@ class LaneDetector():
             target_line = (left + right) / 2 # find middle of left and right
         else:
             target_line = np.full(image_height, self.middle_of_car)
-        points = np.vstack((target_line, y_axis)).T.astype(np.int32)
-        cv2.polylines(debug_image, [points], False, (0, 255, 0), 2)
-        cv2.line(debug_image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (0, 0, 255), 2)
+        points = np.vstack((target_line, y_axis)).T.astype(np.int32)   ###Debug
+        cv2.polylines(debug_image, [points], False, (0, 255, 0), 2)   ###Debug
+        cv2.line(debug_image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (0, 0, 255), 2)   ###Debug
 
         target_line = target_line - self.middle_of_car
 
@@ -126,14 +126,21 @@ class LaneDetector():
         return target_line, cv2.flip(debug_image, 0)
 
     def process_images(self, left):
-        # left_cut = self.cut_image(left)
+        # unused_top_height = 185
+        # left_cut = left[185:, :] #cut the top
+        #
+        # # convert to HLS
+        # left_image = cv2.cvtColor(left_cut, cv2.COLOR_BGR2HLS)
 
-        # convert to HLS
-        left_image = cv2.cvtColor(left, cv2.COLOR_BGR2HLS).astype(np.float)
+
+        left_hls = cv2.cvtColor(left, cv2.COLOR_BGR2HLS)
 
         # filter out lanes and warp it
-        left_filtered = self.filter_lanes(left_image)
+        left_filtered = self.filter_lanes(left_hls)
         # left_filtered = self.colour_threshold(left)
+
+        # left_filtered = cv2.copyMakeBorder(left_filtered, 185, 0, 0, 0, cv2.BORDER_CONSTANT, 0) #adding the top back
+
 
         left_warped = self.warp_image(left_filtered)
 
@@ -144,11 +151,6 @@ class LaneDetector():
 
 
         return target_line, debug_image
-
-    def build_image_from_mask(self, mask):
-        image = np.zeros([mask.shape[0], mask.shape[1], 3], dtype=np.uint8)
-        image[mask > 0] = 255
-        return image
 
 
 if __name__ == "__main__":
