@@ -79,26 +79,26 @@ class LaneDetector():
         return warped
 
     def clean_image(self, image, side="left"):
-        if side == "left":
-            image[:, -300:] = 0
-            image[-50:, -372:] = 0
-        else:
-            image[:, 0:300] = 0
-            image[-50:, :450] = 0
-        return image  # all the stuff below takes too long
-        # labels = label(image)  # labels[0] = image with labels, labels[1] = count of labels
-        # result = labels[0]
-        #
-        # for object_no in range(1, labels[1] + 1):
-        #     # Find pixels with each label value
-        #     nonzero = (result == object_no).nonzero()
-        #     # Identify x and y values of those pixels
-        #     nonzeroy = np.array(nonzero[0])
-        #     nonzerox = np.array(nonzero[1])
-        #     if ((np.max(nonzeroy) - np.min(nonzeroy) < 5) & (np.max(nonzerox) - np.min(nonzerox) < 5)):
-        #         result[(result == object_no)] = 0
-        # result[result > 0] = 1
-        # return result
+#        if side == "left":
+#            image[:, -300:] = 0
+#            image[-50:, -372:] = 0
+#        else:
+#            image[:, 0:300] = 0
+#            image[-50:, :450] = 0
+#        return image  # all the stuff below takes too long
+        labels = label(image)  # labels[0] = image with labels, labels[1] = count of labels
+        result = labels[0]
+        
+        for object_no in range(1, labels[1] + 1):
+            # Find pixels with each label value
+            nonzero = (result == object_no).nonzero()
+            # Identify x and y values of those pixels
+            nonzeroy = np.array(nonzero[0])
+            nonzerox = np.array(nonzero[1])
+            if ((np.max(nonzeroy) - np.min(nonzeroy) < 5) & (np.max(nonzerox) - np.min(nonzerox) < 5)):
+                result[(result == object_no)] = 0
+        result[result > 0] = 1
+        return result
 
     def get_line_fit(self, points, y_axis):
         y, x = np.nonzero(points)
@@ -183,6 +183,7 @@ class LaneDetector():
         # start = time.time()
 
         if self.debugger is not None:
+            del self.debugger[:]
             # record images throughout
             self.debugger.append(("input", [left, right]))
             self.debugger.append(("cut", [left_cut, right_cut]))
@@ -201,13 +202,13 @@ class LaneDetector():
             y_axis = y_axis[51:][::-1]
             cv2.line(image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (255, 255, 255), 2)
             if len(left_fitx) > 0:
-                points = np.vstack((left_fitx[51:], y_axis)).T.astype(np.int32)
+                points = np.vstack((left_fitx[51:], y_axis)).T.astype(np.uint8)
                 cv2.polylines(image, [points], False, (255, 0, 0), 2)
             if len(right_fitx) > 0:
-                points = np.vstack((right_fitx[51:], y_axis)).T.astype(np.int32)
+                points = np.vstack((right_fitx[51:], y_axis)).T.astype(np.uint8)
                 cv2.polylines(image, [points], False, (0, 0, 255), 2)
 
-            points = np.vstack((centre[51:], y_axis)).T.astype(np.int32)
+            points = np.vstack((centre[51:], y_axis)).T.astype(np.uint8)
             cv2.polylines(image, [points], False, (0, 255, 0), 2)
             self.debugger.append(("lane-lines", [image]))
 

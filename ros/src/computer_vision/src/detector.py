@@ -12,7 +12,7 @@ class Detector:
     def __init__(self):
         rospy.init_node("lane_detector")
         self.debug = False
-        self.detector = LaneDetector(debug=self.debug)
+        self.detector = LaneDetector()
         self.bridge = CvBridge()
         
         # subscribe to images

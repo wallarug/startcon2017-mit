@@ -14,7 +14,7 @@ class Controller:
         rospy.init_node("path_controller")
         self.debug = True
 
-        self.steering_pid = PID(0.5, 0.01, 0.001, -0.34, 0.34)
+        self.steering_pid = PID(0.5, 0.0, 0.0, -0.34, 0.34)
 
 
         rospy.Subscriber("/navigation/waypoints", Path, self.on_path_received)
@@ -64,7 +64,7 @@ class Controller:
 
     def generate_drive_stamp(self, steering):
         stamp = AckermannDriveStamped()
-        stamp.drive.steering_angle = -steering
+        stamp.drive.steering_angle = steering
         stamp.drive.speed = -0.3
         rospy.logwarn("steering: %s", steering)
         return stamp
