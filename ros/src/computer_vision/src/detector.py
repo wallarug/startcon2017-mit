@@ -3,6 +3,7 @@
 import rospy
 import numpy as np
 from lane_detector import LaneDetector
+from single_lane_detector import SingleLaneDetector
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge, CvBridgeError
@@ -11,7 +12,7 @@ from nav_msgs.msg import Path
 class Detector:
     def __init__(self):
         rospy.init_node("lane_detector")
-        self.detector = LaneDetector()
+        self.detector = SingleLaneDetector()
         self.bridge = CvBridge()
         
         # subscribe to images

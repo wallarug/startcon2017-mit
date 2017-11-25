@@ -10,7 +10,7 @@ import time
 Pass in [] into the constructor to receive a list of tuples for debugging purposes.
 """
 
-class LaneDetector():
+class SingleLaneDetector():
     def __init__(self):
         self.middle_of_car = (200 + 460)
         self.modified_width = 1072
@@ -93,31 +93,15 @@ class LaneDetector():
         # find target line
         target_line = None
         if len(lines) > 0:
-            left = np.zeros_like(lines[0])
-            left_count = 0
-            right = np.zeros_like(lines[0])
-            right_count = 0
-            for line in lines:  # total the lines to the left and right of the car separately
-                if line[0] < self.middle_of_car:
-                    left = left + line
-                    left_count = left_count + 1
-                if line[0] >= self.middle_of_car:
-                    right = right + line
-                    right_count = right_count + 1
+            all_lines = np.array(lines)
+            all_lines_from_middle = all_lines[:, 0] - self.middle_of_car
 
-            right_count = 0
-            if left_count == 0:
-                right = right / right_count  # average
-                left = right - 800  # this is a guess of lane width
-            elif right_count == 0:
-                left = left / left_count  # average
-                right = left + 800
-            else:
-                left = left / left_count  # average
-                right = right / right_count  # average
-            target_line = (left + right) / 2 # find middle of left and right
+            closest_line = np.argmin(np.absolute(all_lines_from_middle), axis=0)
+            target_line = lines[closest_line]
         else:
             target_line = np.full(image_height, self.middle_of_car)
+
+        # debug_image = cv2.copyMakeBorder(debug_image, 0, 50, 0, 0, cv2.BORDER_CONSTANT, 0)
         points = np.vstack((target_line, y_axis)).T.astype(np.int32)   ###Debug
         cv2.polylines(debug_image, [points], False, (0, 255, 0), 2)   ###Debug
         cv2.line(debug_image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (0, 0, 255), 2)   ###Debug
