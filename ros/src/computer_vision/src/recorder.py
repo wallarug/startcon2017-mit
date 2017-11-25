@@ -2,7 +2,6 @@
 
 import rospy
 import numpy as np
-from lane_detector import LaneDetector
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge, CvBridgeError
@@ -14,7 +13,6 @@ import cv2
 class Recorder:
     def __init__(self):
         rospy.init_node("lane_detector")
-        self.detector = LaneDetector()
         self.bridge = CvBridge()
 
         # subscribe to images
@@ -40,10 +38,10 @@ class Recorder:
     def publish(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
-            if self.left_image is not None and self.steer is not None and self.speed > 0:
+            if self.left_image is not None and self.steer is not None and self.speed < 0:
                 try:
                     rospy.logwarn("saving image with steer: %s, speed: %s", self.steer, self.speed)
-                    # cv2.imwrite("/home/william/startcon-ros/bagfiles/leftimage_" + self.steer + ".jpg", self.left_image)
+                    cv2.imwrite("/home/william/dev/startcon-ros/bagfiles/leftimage_" + str(self.steer) + ".jpg", self.left_image)
                 except Exception as e:
                     rospy.logerr(e)
 
