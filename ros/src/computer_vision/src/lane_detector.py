@@ -57,6 +57,7 @@ class LaneDetector():
 
     # returns lines, debug_image
     def find_all_lines(self, image):
+        target_horizon = 150
         labeled_array, num_features = label(image)
 
         image_height = image.shape[0]
@@ -79,6 +80,13 @@ class LaneDetector():
             # line_fitx = fit[0] * y_axis + fit[1]
             return line_fitx
 
+        def get_closest_line(lines, target):
+            all_lines = np.array(lines)
+            all_lines_from_middle = all_lines[:, target_horizon] - self.middle_of_car
+
+            closest_line = np.argmin(np.absolute(all_lines_from_middle), axis=0)
+            return closest_line
+
         for feature in range(1, num_features + 1):
             feature_image = (labeled_array == feature)
             try:
@@ -93,34 +101,34 @@ class LaneDetector():
         # find target line
         target_line = None
         if len(lines) > 0:
-            left = np.zeros_like(lines[0])
-            left_count = 0
-            right = np.zeros_like(lines[0])
-            right_count = 0
+            left_lines = []
+            right_lines = []
             for line in lines:  # total the lines to the left and right of the car separately
-                if line[0] < self.middle_of_car:
-                    left = left + line
-                    left_count = left_count + 1
-                if line[0] >= self.middle_of_car:
-                    right = right + line
-                    right_count = right_count + 1
+                if line[target_horizon] < self.middle_of_car:
+                    left_lines.append(line)
+                if line[target_horizon] >= self.middle_of_car:
+                    right_lines.append(line)
 
-            right_count = 0
-            if left_count == 0:
-                right = right / right_count  # average
-                left = right - 800  # this is a guess of lane width
-            elif right_count == 0:
-                left = left / left_count  # average
-                right = left + 800
+            if len(left_lines) == 0:
+                closest_right = get_closest_line(right_lines, self.middle_of_car)
+                right = right_lines[closest_right]
+                left = right - 600  # this is a guess of lane width
+            elif len(right_lines) == 0:
+                closest_left = get_closest_line(left_lines, self.middle_of_car)
+                left = left_lines[closest_left]
+                right = left + 600
             else:
-                left = left / left_count  # average
-                right = right / right_count  # average
+                closest_left = get_closest_line(left_lines, self.middle_of_car)
+                left = left_lines[closest_left]
+                closest_right = get_closest_line(right_lines, self.middle_of_car)
+                right = right_lines[closest_right]
             target_line = (left + right) / 2 # find middle of left and right
         else:
             target_line = np.full(image_height, self.middle_of_car)
         points = np.vstack((target_line, y_axis)).T.astype(np.int32)   ###Debug
         cv2.polylines(debug_image, [points], False, (0, 255, 0), 2)   ###Debug
         cv2.line(debug_image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (0, 0, 255), 2)   ###Debug
+        cv2.line(debug_image, (0, target_horizon), (self.modified_width, target_horizon), (0, 0, 255), 2)  ###Debug
 
         target_line = target_line - self.middle_of_car
 

@@ -12,7 +12,7 @@ from nav_msgs.msg import Path
 class Detector:
     def __init__(self):
         rospy.init_node("lane_detector")
-        self.detector = SingleLaneDetector()
+        self.detector = LaneDetector()
         self.bridge = CvBridge()
         
         # subscribe to images
@@ -57,8 +57,8 @@ class Detector:
     def generate_path(self, target_line):
         path = Path()
         path.header.frame_id = "/zed_initial_frame"
-        # rospy.logwarn(target_line[0])
-        for index, point in enumerate(target_line):
+        rospy.logwarn(target_line[150])
+        for index, point in enumerate(target_line[150:]):
             pose = self.generate_pose(index/1000, point/1000, 0, 0, 0, 0, 0)  # ~ measuring a pixel per mm
             path.poses.append(pose)
 
