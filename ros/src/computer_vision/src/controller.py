@@ -65,7 +65,7 @@ class Controller:
     def generate_drive_stamp(self, steering):
         stamp = AckermannDriveStamped()
         stamp.drive.steering_angle = -steering
-        stamp.drive.speed = -0.3
+        stamp.drive.speed = -0.4
         rospy.logwarn("steering: %s", steering)
         return stamp
 
