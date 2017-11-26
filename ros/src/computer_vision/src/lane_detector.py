@@ -13,7 +13,7 @@ Pass in [] into the constructor to receive a list of tuples for debugging purpos
 class LaneDetector():
     def __init__(self):
         self.middle_of_car = (200 + 460)
-        self.modified_width = 1072
+        self.modified_width = 1272
         self.modified_height = 376
 
     def hsl_channel_threshold(self, hls, l_thresh=(0., 50)):
@@ -49,7 +49,7 @@ class LaneDetector():
 
         if mode == 'normal':
             M = cv2.getPerspectiveTransform(src, dst)
-            warped = cv2.warpPerspective(image, M, (1072, image.shape[0]), flags=cv2.INTER_LINEAR)
+            warped = cv2.warpPerspective(image, M, (1272, image.shape[0]), flags=cv2.INTER_LINEAR)
         elif mode == 'inverse':
             M = cv2.getPerspectiveTransform(dst, src)
             warped = cv2.warpPerspective(image, M, (672, image.shape[0]), flags=cv2.INTER_LINEAR)
@@ -72,7 +72,7 @@ class LaneDetector():
         def get_line_fit(points, y_axis):
             y, x = np.nonzero(points)
             # ignore small blocks
-            if ((np.max(y) - np.min(y) < 100) & (np.max(x) - np.min(x) < 100)):
+            if ((np.max(y) - np.min(y) < 150) & (np.max(x) - np.min(x) < 150)):
                 return None
 
             fit = np.polyfit(y, x, 2)
