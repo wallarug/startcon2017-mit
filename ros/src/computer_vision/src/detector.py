@@ -3,6 +3,7 @@
 import rospy
 import numpy as np
 from lane_detector import LaneDetector
+from single_lane_detector import SingleLaneDetector
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge, CvBridgeError
@@ -22,7 +23,6 @@ class Detector:
         self.debug_lane_pub = rospy.Publisher("debug/lane_image", Image, queue_size=1)
 
         self.left_image = None
-        self.right_image = None
         self.publish()
 
     def on_left_image(self, data):
@@ -33,15 +33,15 @@ class Detector:
         
 
     def publish(self):
-        rate = rospy.Rate(5)
+        rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             if self.left_image is not None:
                 try:
                     # start = rospy.get_time()
                     target_line, debug_image = self.detector.process_images(self.left_image)
-                    # rospy.logwarn("time elapsed doing work: %s", rospy.get_time() - start)
                     self.generate_path(target_line)
                     self.debug_publish(debug_image)
+                    # rospy.logwarn("time elapsed doing work: %s", rospy.get_time() - start)
                 except CvBridgeError as e:
                     rospy.logerr(e)
                 except Exception as e:
@@ -56,8 +56,8 @@ class Detector:
     def generate_path(self, target_line):
         path = Path()
         path.header.frame_id = "/zed_initial_frame"
-        # rospy.logwarn(target_line[0])
-        for index, point in enumerate(target_line):
+        # rospy.logwarn(target_line[150])
+        for index, point in enumerate(target_line[150:]):
             pose = self.generate_pose(index/1000, point/1000, 0, 0, 0, 0, 0)  # ~ measuring a pixel per mm
             path.poses.append(pose)
 

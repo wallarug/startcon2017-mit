@@ -10,10 +10,10 @@ import time
 Pass in [] into the constructor to receive a list of tuples for debugging purposes.
 """
 
-class LaneDetector():
+class SingleLaneDetector():
     def __init__(self):
         self.middle_of_car = (200 + 460)
-        self.modified_width = 1272
+        self.modified_width = 1072
         self.modified_height = 376
 
     def hsl_channel_threshold(self, hls, l_thresh=(0., 50)):
@@ -49,7 +49,7 @@ class LaneDetector():
 
         if mode == 'normal':
             M = cv2.getPerspectiveTransform(src, dst)
-            warped = cv2.warpPerspective(image, M, (1272, image.shape[0]), flags=cv2.INTER_LINEAR)
+            warped = cv2.warpPerspective(image, M, (1072, image.shape[0]), flags=cv2.INTER_LINEAR)
         elif mode == 'inverse':
             M = cv2.getPerspectiveTransform(dst, src)
             warped = cv2.warpPerspective(image, M, (672, image.shape[0]), flags=cv2.INTER_LINEAR)
@@ -57,7 +57,6 @@ class LaneDetector():
 
     # returns lines, debug_image
     def find_all_lines(self, image):
-        target_horizon = 150
         labeled_array, num_features = label(image)
 
         image_height = image.shape[0]
@@ -72,20 +71,13 @@ class LaneDetector():
         def get_line_fit(points, y_axis):
             y, x = np.nonzero(points)
             # ignore small blocks
-            if ((np.max(y) - np.min(y) < 150) & (np.max(x) - np.min(x) < 150)):
+            if ((np.max(y) - np.min(y) < 100) & (np.max(x) - np.min(x) < 100)):
                 return None
 
             fit = np.polyfit(y, x, 2)
             line_fitx = fit[0] * y_axis ** 2 + fit[1] * y_axis + fit[2]
             # line_fitx = fit[0] * y_axis + fit[1]
             return line_fitx
-
-        def get_closest_line(lines, target):
-            all_lines = np.array(lines)
-            all_lines_from_middle = all_lines[:, target_horizon] - self.middle_of_car
-
-            closest_line = np.argmin(np.absolute(all_lines_from_middle), axis=0)
-            return closest_line
 
         for feature in range(1, num_features + 1):
             feature_image = (labeled_array == feature)
@@ -101,34 +93,18 @@ class LaneDetector():
         # find target line
         target_line = None
         if len(lines) > 0:
-            left_lines = []
-            right_lines = []
-            for line in lines:  # total the lines to the left and right of the car separately
-                if line[target_horizon] < self.middle_of_car:
-                    left_lines.append(line)
-                if line[target_horizon] >= self.middle_of_car:
-                    right_lines.append(line)
+            all_lines = np.array(lines)
+            all_lines_from_middle = all_lines[:, 0] - self.middle_of_car
 
-            if len(left_lines) == 0:
-                closest_right = get_closest_line(right_lines, self.middle_of_car)
-                right = right_lines[closest_right]
-                left = right - 600  # this is a guess of lane width
-            elif len(right_lines) == 0:
-                closest_left = get_closest_line(left_lines, self.middle_of_car)
-                left = left_lines[closest_left]
-                right = left + 600
-            else:
-                closest_left = get_closest_line(left_lines, self.middle_of_car)
-                left = left_lines[closest_left]
-                closest_right = get_closest_line(right_lines, self.middle_of_car)
-                right = right_lines[closest_right]
-            target_line = (left + right) / 2 # find middle of left and right
+            closest_line = np.argmin(np.absolute(all_lines_from_middle), axis=0)
+            target_line = lines[closest_line]
         else:
             target_line = np.full(image_height, self.middle_of_car)
+
+        # debug_image = cv2.copyMakeBorder(debug_image, 0, 50, 0, 0, cv2.BORDER_CONSTANT, 0)
         points = np.vstack((target_line, y_axis)).T.astype(np.int32)   ###Debug
         cv2.polylines(debug_image, [points], False, (0, 255, 0), 2)   ###Debug
         cv2.line(debug_image, (self.middle_of_car, 0), (self.middle_of_car, image_height), (0, 0, 255), 2)   ###Debug
-        cv2.line(debug_image, (0, target_horizon), (self.modified_width, target_horizon), (0, 0, 255), 2)  ###Debug
 
         target_line = target_line - self.middle_of_car
 
