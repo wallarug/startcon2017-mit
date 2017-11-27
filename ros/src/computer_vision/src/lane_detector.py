@@ -5,7 +5,6 @@ import cv2 as cv2
 import numpy as np
 import sys
 import time
-import rospy
 
 """Lane Detector
 Pass in [] into the constructor to receive a list of tuples for debugging purposes.
