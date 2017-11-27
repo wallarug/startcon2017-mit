@@ -16,13 +16,14 @@ class LaneDetector():
         self.modified_width = 1272
         self.modified_height = 376
 
-    def hsl_channel_threshold(self, hls, l_thresh=(180., 255), h_thresh=(0, 30)):
+    def hsl_channel_threshold(self, hls, l_thresh=(150., 255)):
         l_channel = hls[:, :, 1]
-        h_channel = hls[:, :, 0]
+        # h_channel = hls[:, :, 0]
 
         # Threshold lightness channel and hue
         binary = np.zeros_like(l_channel)
-        binary[((h_channel > h_thresh[0]) & (h_channel <= h_thresh[1])) | ((l_channel > l_thresh[0]) & (l_channel <= l_thresh[1]))] = 1
+        # binary[((h_channel > h_thresh[0]) & (h_channel <= h_thresh[1])) | ((l_channel > l_thresh[0]) & (l_channel <= l_thresh[1]))] = 1
+        binary[(l_channel > l_thresh[0]) & (l_channel <= l_thresh[1])] = 1
 
         return binary
 
@@ -64,8 +65,10 @@ class LaneDetector():
         def get_line_fit(points, y_axis):
             y, x = np.nonzero(points)
             # ignore small blocks
-            if ((np.max(y) - np.min(y) < 150) & (np.max(x) - np.min(x) < 150)):
+            if ((np.max(y) - np.min(y) < 150) & (np.max(x) - np.min(x) < 150)):  #get rid of small blocks
                 return None
+            # elif ((np.max(y) - np.min(y) > 150) & (np.max(x) - np.min(x) > 150)): #get rid of big blocks
+            #     return None
 
             fit = np.polyfit(y, x, 2)
             line_fitx = fit[0] * y_axis ** 2 + fit[1] * y_axis + fit[2]
