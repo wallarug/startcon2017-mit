@@ -16,14 +16,16 @@ class LaneDetector():
         self.modified_width = 1272
         self.modified_height = 376
 
-    def hsl_channel_threshold(self, hls, l_thresh=(0., 50)):
+    def hsl_channel_threshold(hls, l_thresh=(180., 255), h_thresh=(0, 30)):
         l_channel = hls[:, :, 1]
+        h_channel = hls[:, :, 0]
 
-        # Threshold lightness channel
-        l_binary = np.zeros_like(l_channel)
-        l_binary[(l_channel > l_thresh[0]) & (l_channel <= l_thresh[1])] = 1
+        # Threshold lightness channel and hue
+        binary = np.zeros_like(l_channel)
+        binary[((h_channel > h_thresh[0]) & (h_channel <= h_thresh[1]))
+                 | ((l_channel > l_thresh[0]) & (l_channel <= l_thresh[1]))] = 1
 
-        return l_binary
+        return binary
 
     # not used yet
     def colour_threshold(self, image, thresh=(210, 255)):
@@ -32,15 +34,6 @@ class LaneDetector():
                  & (image[:, :, 0] < thresh[1]) & (image[:, :, 1] < thresh[1]) & (image[:, :, 2] < thresh[1])] = 255
         return combined
 
-    def filter_lanes(self, image):
-        hsl_channel_binary = self.hsl_channel_threshold(image, l_thresh=(210., 255.))
-
-        combined = np.zeros_like(hsl_channel_binary)  # this makes it 1 channel
-        combined[(hsl_channel_binary == 1)] = 1
-        return combined
-
-    def cut_image(self, image):
-        return image[185:, :] #cut the top
 
     def warp_image(self, image, mode='normal'):
         warp_vertices_src = [(75, image.shape[0]), (300, 185), (385, 185), (597, image.shape[0])]  # both sides
@@ -136,19 +129,12 @@ class LaneDetector():
         return target_line, cv2.flip(debug_image, 0)
 
     def process_images(self, left):
-        # unused_top_height = 185
-        # left_cut = left[185:, :] #cut the top
-        #
         # # convert to HLS
-        # left_image = cv2.cvtColor(left_cut, cv2.COLOR_BGR2HLS)
-
-
         left_hls = cv2.cvtColor(left, cv2.COLOR_BGR2HLS)
 
         # filter out lanes and warp it
-        left_filtered = self.filter_lanes(left_hls)
+        left_filtered = self.hsl_channel_threshold(left_hls)
         # left_filtered = self.colour_threshold(left)
-
         # left_filtered = cv2.copyMakeBorder(left_filtered, 185, 0, 0, 0, cv2.BORDER_CONSTANT, 0) #adding the top back
 
 
