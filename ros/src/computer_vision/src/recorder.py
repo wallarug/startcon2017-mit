@@ -41,7 +41,7 @@ class Recorder:
             if self.left_image is not None and self.steer is not None and self.speed < 0:
                 try:
                     rospy.logwarn("saving image with steer: %s, speed: %s", self.steer, self.speed)
-                    cv2.imwrite("/home/william/dev/startcon-ros/bagfiles/leftimage_" + str(self.steer) + ".jpg", self.left_image)
+                    cv2.imwrite("../bagfiles/leftimage_" + str(self.steer) + ".jpg", self.left_image)
                 except Exception as e:
                     rospy.logerr(e)
 
