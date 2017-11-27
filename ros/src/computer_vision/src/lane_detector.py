@@ -5,6 +5,7 @@ import cv2 as cv2
 import numpy as np
 import sys
 import time
+import rospy
 
 """Lane Detector
 Pass in [] into the constructor to receive a list of tuples for debugging purposes.
@@ -16,14 +17,13 @@ class LaneDetector():
         self.modified_width = 1272
         self.modified_height = 376
 
-    def hsl_channel_threshold(hls, l_thresh=(180., 255), h_thresh=(0, 30)):
+    def hsl_channel_threshold(self, hls, l_thresh=(180., 255), h_thresh=(0, 30)):
         l_channel = hls[:, :, 1]
         h_channel = hls[:, :, 0]
 
         # Threshold lightness channel and hue
         binary = np.zeros_like(l_channel)
-        binary[((h_channel > h_thresh[0]) & (h_channel <= h_thresh[1]))
-                 | ((l_channel > l_thresh[0]) & (l_channel <= l_thresh[1]))] = 1
+        binary[((h_channel > h_thresh[0]) & (h_channel <= h_thresh[1])) | ((l_channel > l_thresh[0]) & (l_channel <= l_thresh[1]))] = 1
 
         return binary
 
