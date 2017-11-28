@@ -14,9 +14,10 @@ sudo apt-get install ros-kinetic-rplidar-ros    # need to install this for rplid
 sudo apt-get install ros-kinetic-hector-slam    # SLAM packages
 ```
 
-# install vision_opencv
+# install other dependencies
 ```
 sudo apt-get install ros-kinetic-vision-opencv
+sudo apt-get install ros-kinetic-pointcloud-to-laserscan
 ```
 
 To build and set environment variables
