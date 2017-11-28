@@ -53,6 +53,18 @@ export ROS_MASTER_URI=http://x.x.x.x:11311 the_robotics_club observer.launch
 ```
 
 
+# to record left_image + steering from bag files
+```
+roscore #start master
+rqt_bag #then use this to load bag file then right click on the left image, choose publish then click play
+rosrun computer_vision recorder.py
+```
+alternative would be to have 2 ssh sessions
+```
+roslaunch the_robotics_club mit-car.launch  #1 terminal
+rosrun computer_vision recorder.py  #2 terminal
+```
+
 
 # How to watch the GPU memory usage
 looks like the Zed uses about 1850/7850MB just being in the desktop with a few terminals and gedit running
