@@ -39,12 +39,17 @@ roslaunch the_robotics_club mit-car-lidar-observer.launch
 
 # run car + camera + cv
 roslaunch the_robotics_club mit-car-vision.launch
+
+# download model from https://drive.google.com/open?id=15ClgOcXsWBzgQJM-lnWa_vCri7TvCSrZ into ros dir
+# run car + camera + ai driving
+roslaunch the_robotics_club mit-car-ai.launch
 ```
 
 # Using the Computer Vision launcher
 The joystick is used as safety for now. 
 Top left trigger: as is previously, used for manual control.
 Top right trigger: activates driving based computer vision & PID
+
 
 
 # To observe the camera remotely with rqt_gui
