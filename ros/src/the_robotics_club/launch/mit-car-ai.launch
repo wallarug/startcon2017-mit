@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find racecar)/launch/teleop.launch" />
+    <include file="$(find the_robotics_club)/launch/zed_camera.launch" />
+    <include file="$(find ai)/ai.launch" />
+</launch>

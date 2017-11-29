@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="ai" type="ai_controller.py" name="ai_controller" />
+</launch>
