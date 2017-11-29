@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
 <launch>
     <node pkg="ai" type="ai_controller.py" name="ai_controller" />
+    <node pkg="ai" type="image_feed.py" name="ai_image_feed" />
 </launch>
