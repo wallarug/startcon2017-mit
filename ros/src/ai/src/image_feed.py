@@ -25,8 +25,8 @@ class AIController:
     def on_left_image(self, data):
         try:
             self.left_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            img = self.left_image[150:, :]
-            img = cv2.resize(img, (168, 113), interpolation=cv2.INTER_AREA)
+            img = self.left_image[200:, :]
+            img = cv2.resize(img, (168, 44), interpolation=cv2.INTER_AREA)
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(img, "rgb8"))
         except CvBridgeError as e:
             rospy.logerr(e)

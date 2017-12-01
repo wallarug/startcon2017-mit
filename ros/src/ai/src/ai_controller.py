@@ -32,8 +32,8 @@ class AIController:
             if self.left_image is not None:
                 try:
                     # start = rospy.get_time()
-                    img = self.left_image[150:, :]
-                    img = cv2.resize(img, (168, 113), interpolation=cv2.INTER_AREA)
+                    img = self.left_image[200:, :]
+                    img = cv2.resize(img, (168, 44), interpolation=cv2.INTER_AREA)
                     prediction = self.model.predict(img[None, :, :, :], batch_size=1)[0][0]
                     self.steering = prediction
                     # rospy.logwarn(prediction)
@@ -62,7 +62,7 @@ class AIController:
 
     def generate_drive_stamp(self, steering):
         stamp = AckermannDriveStamped()
-        stamp.drive.steering_angle = -steering
+        stamp.drive.steering_angle = steering
         stamp.drive.speed = -0.4
         rospy.logwarn("steering: %s", steering)
         return stamp
