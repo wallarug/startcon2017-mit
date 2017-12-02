@@ -27,7 +27,7 @@ class AIController:
 
 
     def run_nn(self):
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(20)
         while not rospy.is_shutdown():
             if self.left_image is not None:
                 try:
@@ -63,7 +63,7 @@ class AIController:
     def generate_drive_stamp(self, steering):
         stamp = AckermannDriveStamped()
         stamp.drive.steering_angle = steering
-        stamp.drive.speed = -0.4
+        stamp.drive.speed = -2.
         rospy.logwarn("steering: %s", steering)
         return stamp
 
