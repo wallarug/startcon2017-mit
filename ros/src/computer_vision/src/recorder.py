@@ -36,7 +36,7 @@ class Recorder:
         self.speed = msg.drive.speed
 
     def publish(self):
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(20)
         while not rospy.is_shutdown():
             if self.left_image is not None and self.steer is not None and self.speed < 0:
                 randint = round(np.random.rand(), 5)
