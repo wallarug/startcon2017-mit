@@ -14,9 +14,9 @@ class AIController:
 
         self.bridge = CvBridge()
 
-        # subscribe to images
+        # subscribe to images, currently taking left image
         rospy.Subscriber("left/image_rect_color", Image, self.on_left_image)
-
+	#publish to a debug topic so other computers can see the image being classified
         self.image_pub = rospy.Publisher('/debug/ai_image_view', Image, queue_size=1)
         self.left_image = None
         rospy.spin()
